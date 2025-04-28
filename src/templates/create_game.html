@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            poppins: ['Poppins', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center font-poppins">
+  <div class="w-full max-w-md mx-auto p-6">
+    <h1 class="text-2xl font-semibold text-center mb-8">Create Game</h1>
+    
+    <form action="{{ url_for('create_game') }}" method="POST" class="space-y-6">
+      <!-- Player Number Input -->
+      <div class="space-y-2">
+        <label for="playerNumber" class="block text-sm font-medium text-gray-700">Player Number</label>
+        <input 
+          type="number" 
+          id="playerNumber" 
+          name="playerNumber" 
+          min="1" 
+          max="99" 
+          placeholder="Enter player number" 
+          class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+          required
+        >
+      </div>
+      
+      <!-- Anonymous Option -->
+      <div class="space-y-2">
+        <p class="block text-sm font-medium text-gray-700">Anonymous</p>
+        <div class="flex space-x-4">
+          <label class="inline-flex items-center">
+            <input type="radio" name="anonymous" value="yes" class="form-radio h-5 w-5 text-black focus:ring-black">
+            <span class="ml-2">Yes</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="radio" name="anonymous" value="no" class="form-radio h-5 w-5 text-black focus:ring-black" checked>
+            <span class="ml-2">No</span>
+          </label>
+        </div>
+      </div>
+      
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        class="w-full bg-black hover:bg-gray-800 text-white font-medium py-3 sm:py-4 px-6 rounded-lg transition duration-200 shadow-md text-base sm:text-lg"
+      >
+        Create Game
+      </button>
+      
+      <!-- Back Button -->
+      <a 
+        href="{{ url_for('home') }}" 
+        class="block w-full text-center py-3 text-gray-600 hover:text-black transition duration-200 text-sm"
+      >
+        Back to Home
+      </a>
+    </form>
+  </div>
+</body>
+</html>

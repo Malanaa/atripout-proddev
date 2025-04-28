@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atripout - Game Options</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            poppins: ['Poppins', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    .logo-container {
+      position: relative;
+      overflow: hidden;
+      height: 150px;
+      margin-bottom: 2rem;
+    }
+    
+    .logo-text {
+      position: relative;
+      display: inline-block;
+      font-weight: 700;
+      letter-spacing: 4px;
+    }
+    
+    .letter {
+      display: inline-block;
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+    
+    .ball {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(145deg, #000000, #333333);
+      border-radius: 50%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      top: 50%;
+      left: -30px;
+      transform: translateY(-50%);
+      z-index: 10;
+      animation: bounce-through 5s infinite ease-in-out;
+    }
+    
+    @keyframes bounce-through {
+      0%, 100% { left: -30px; top: 50%; }
+      /* A - position */
+      5% { left: 5%; top: 70%; }
+      10% { left: 10%; top: 30%; }
+      /* T - position */
+      15% { left: 20%; top: 70%; }
+      20% { left: 25%; top: 30%; }
+      /* R - position */
+      25% { left: 35%; top: 70%; }
+      30% { left: 40%; top: 30%; }
+      /* I - position */
+      35% { left: 50%; top: 70%; }
+      40% { left: 50%; top: 30%; }
+      /* P - position */
+      45% { left: 60%; top: 70%; }
+      50% { left: 65%; top: 30%; }
+      /* O - position */
+      55% { left: 75%; top: 70%; }
+      60% { left: 80%; top: 30%; }
+      /* U - position */
+      65% { left: 85%; top: 70%; }
+      70% { left: 90%; top: 30%; }
+      /* T - position */
+      75% { left: 95%; top: 70%; }
+      80% { left: 100%; top: 30%; }
+      85% { left: 105%; top: 50%; }
+    }
+    
+    .road {
+      position: absolute;
+      height: 12px;
+      background-color: #333;
+      bottom: 15px;
+      width: 100%;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .road-dash {
+      position: absolute;
+      height: 4px;
+      background-color: #fff;
+      bottom: 19px;
+      width: 25px;
+      border-radius: 2px;
+    }
+    
+    @media (max-width: 640px) {
+      .logo-container {
+        height: 120px;
+      }
+      
+      .ball {
+        width: 15px;
+        height: 15px;
+      }
+      
+      .road {
+        height: 8px;
+        bottom: 12px;
+      }
+      
+      .road-dash {
+        height: 3px;
+        bottom: 14.5px;
+        width: 20px;
+      }
+    }
+  </style>
+</head>
+<body class=" bg-gray-50 min-h-screen flex items-center justify-center font-poppins">
+  <div class="flex flex-col items-center space-y-4 sm:space-y-6 md:space-y-8 p-4 sm:p-6 w-full max-w-md mx-auto">
+    <!-- Animated Logo -->
+    <div class="logo-container w-full text-center">
+      <h1 class="logo-text text-4xl sm:text-5xl md:text-6xl">
+        <span class="letter">A</span>
+        <span class="letter">t</span>
+        <span class="letter">r</span>
+        <span class="letter">i</span>
+        <span class="letter">p</span>
+        <span class="letter">o</span>
+        <span class="letter">u</span>
+        <span class="letter">t</span>
+      </h1>
+      
+      <!-- Bouncing Ball -->
+      <div class="ball"></div>
+      
+      <!-- Smoother, Wider Road -->
+      <div class="road"></div>
+      
+      <!-- Road Dashes -->
+      <div class="road-dash" style="left: 10%"></div>
+      <div class="road-dash" style="left: 25%"></div>
+      <div class="road-dash" style="left: 40%"></div>
+      <div class="road-dash" style="left: 55%"></div>
+      <div class="road-dash" style="left: 70%"></div>
+      <div class="road-dash" style="left: 85%"></div>
+    </div>
+    
+    <!-- Buttons -->
+    <a  href="{{url_for('join_game')}}" class="bg-black hover:bg-gray-800 text-white font-medium py-3 sm:py-4 px-6 sm:px-10 rounded-lg w-full sm:w-72 md:w-80 lg:w-96 transition duration-200 shadow-md text-base sm:text-lg">
+      Join Game
+    </a>
+    <a href="{{url_for('create_game')}}" class="bg-black hover:bg-gray-800 text-white font-medium py-3 sm:py-4 px-6 sm:px-10 rounded-lg w-full sm:w-72 md:w-80 lg:w-96 transition duration-200 shadow-md text-base sm:text-lg">
+      Create Game
+    </a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const ball = document.querySelector('.ball');
+      const letters = document.querySelectorAll('.letter');
+      
+      // Add animation listener to create letter bounce effect
+      ball.addEventListener('animationiteration', () => {
+        // Reset animation
+        ball.style.animation = 'none';
+        setTimeout(() => {
+          ball.style.animation = 'bounce-through 5s infinite ease-in-out';
+        }, 10);
+      });
+      
+      // Add subtle letter animation when ball passes
+      function animateLetters() {
+        const ballRect = ball.getBoundingClientRect();
+        const ballCenterX = ballRect.left + ballRect.width / 2;
+        
+        letters.forEach((letter, index) => {
+          const letterRect = letter.getBoundingClientRect();
+          const letterCenterX = letterRect.left + letterRect.width / 2;
+          const distance = Math.abs(ballCenterX - letterCenterX);
+          
+          // If ball is close to letter, add bounce effect
+          if (distance < 30) {
+            letter.style.transform = 'translateY(-5px)';
+            setTimeout(() => {
+              letter.style.transform = 'translateY(0)';
+            }, 200);
+          }
+        });
+        
+        requestAnimationFrame(animateLetters);
+      }
+      
+      animateLetters();
+    });
+  </script>
+</body>
+</html>

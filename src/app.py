@@ -1,8 +1,9 @@
 from flask import Flask, render_template, url_for, request
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room, emit
 from utilities import tierlist as tr
 from utilities.mongodb.mongo_client import mongo_game_sessions, mongo_tierlists
-
+import eventlet as et
+import time
 
 # APP_OBJECT
 app = Flask("__name__")
@@ -12,8 +13,53 @@ socketio = SocketIO(app)
 @app.route('/')
 @app.route('/home')
 def home():
+    return render_template("index.html")
+
+@app.route('/create', methods=["POST", "GET"])
+def create_game():
+    if request.method == "POST":
+        player_number = request.form.get('playerNumber')
+        anonymous = request.form.get('anonymous') == 'yes'
+        return url_for('tierlist_proccessing', isAnon=anonymous, numPlayers=player_number)
+    # send tierlistobjects and like set up a tierlits room.
+    return render_template('create_game.html')
+
+@app.route('/create', methods=["POST", "GET"])
+def tierlist_proccessing():
+    # Make a tierlist as a form and then take in the tierlist as a tierlist object and create a game session with a room socket
+    return render_template("middleman_tierlist.html")
+
+# Defining n-directional sockets (socketio rooms)
+@socketio.on('join_room')
+def on_join(data):
+    username = data['username']
+    room = data['room']
+    join_room(room) # I assume this is some sort of uid for each room sepratly 
+    emit('room_response', f"{username} has joined session = {room}", to=room)
+    print(f"{username} has joined {room}")
+
+@socketio.on('leave_room')
+def on_leave(data):
+    username = data['username']
+    room = data['room']
+    leave_room(room)
+    emit('room_response', f"{username} has left the room {room}.", to=room)
+    print(f"{username} has left the room {room}.")
+
+@socketio.on('send_message_to_room')
+def handle_send_message(data):
+    room = data['room']
+    message = data['message']
+    emit('room_message', message, to=room)
+
+
+@app.route('/test')
+def test():
     return render_template("home.html")
 
+@app.route('/join')
+def join_game():
+    return render_template('index.html')
 
 
 @app.route('/sample_tierlist')
@@ -22,7 +68,22 @@ def sample_tierlist():
     return render_template('sample_tierlist.html', tierlist=sample_tierlist)
 
 
-if __name__ == '__main__':
-    app.run()
-    socketio.run(app)
+
+@socketio.on('send_text_to_server')
+def handle_test_send_event(msg):
+    print(f"message from client: {msg}")
+    time.sleep(2)
+    socketio.emit('send_text_to_client', input(f"{msg}: "))
+
+# @socketio.on('message')
+# def handle_message(msg):
+#     print(f"Logged Message : {msg}")
+#     socketio.emit('second_response', {'data': 'Message received!'})
+
+# @socketio.on('gang')
+# def handle_gang(msg):
+#     print(f"gang messagiung wow : {msg}")
+#     socketio.emit('response', {'data': 'GANG Message received!'})
+# if __name__ == '__main__': 
+#     socketio.run(app)
 

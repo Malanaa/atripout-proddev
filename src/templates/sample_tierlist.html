@@ -1,58 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>sample_tier_list</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
 </head>
-<body class="bg-[#1e1e1e] text-white min-h-screen py-10 px-4">
-  <h1 class="text-4xl font-bold text-center mb-8">sample_tier_list</h1>
-  <div class="max-w-6xl mx-auto space-y-2">
-    {% for tier_name, items in tierlist.tiers.items() %}
-      <div class="flex items-center border border-gray-700 rounded overflow-hidden">
-        <!-- Tier Label -->
-        <div class="w-24 h-20 flex items-center justify-center text-xl font-bold text-black
-            {% if tier_name == 'S' %}bg-[#ff6b6b]
-            {% elif tier_name == 'A' %}bg-[#faaa5a]
-            {% elif tier_name == 'B' %}bg-[#ffd966]
-            {% elif tier_name == 'C' %}bg-[#ffff66]
-            {% elif tier_name == 'D' %}bg-[#99ff99]
-            {% else %}bg-gray-400
-            {% endif %}
-        ">
-        {{ tier_name }}
-        </div>
-
-
-        <!-- Tier Items -->
-        <div class="flex-1 min-h-[5rem] bg-[#1e1e1e] px-4 py-2 overflow-x-auto">
-          <ul class="flex items-center space-x-3">
-            {% if items %}
-              {% for item in items %}
-                <li class="bg-gray-800 border border-gray-600 px-4 py-2 rounded text-sm font-medium shadow whitespace-nowrap">
-                  {{ item }}
-                </li>
-              {% endfor %}
-            {% else %}
-
-            {% endif %}
-          </ul>
-        </div>
-
-      </div>
-    {% endfor %}
-    <script>
-      var socket = io()
-      socket.emit('join_room', {'username': 'John', 'room': 'room1'});
-
-      socket.on('room_response', function(message) {
-        console.log('Room Response:', message);
-
-      socket.emit('leave_room', {'username': 'John', 'room': 'room1'})
-    });
-    </script>
-  </div>
+<body>
+  
 </body>
 </html>
+
+<!-- Sameple Tierlist Processing. -->

@@ -1,51 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>sample_tier_list</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            game: ['Fredoka', 'sans-serif'],
+          },
+          borderWidth: {
+            '3': '3px',
+            '6': '6px',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background-color: #f5f5f5;
+      background-image: radial-gradient(#000000 0.5px, transparent 0.5px), radial-gradient(#000000 0.5px, #f5f5f5 0.5px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+    }
+    
+    .game-card {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .game-input:focus {
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .game-button {
+      transition: all 0.2s;
+    }
+    
+    .game-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+    
+    .game-button:active {
+      transform: translateY(0);
+    }
+    
+    .tier-label {
+      transition: all 0.2s;
+    }
+    
+    .tier-label:focus {
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .image-preview img {
+      transition: all 0.2s;
+    }
+    
+    .image-preview img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+  </style>
 </head>
-<body class="bg-[#1e1e1e] text-white min-h-screen py-10 px-4">
-  <h1 class="text-4xl font-bold text-center mb-8">sample_tier_list</h1>
-  <div class="max-w-6xl mx-auto space-y-2">
-    {% for tier_name, items in tierlist.tiers.items() %}
-      <div class="flex items-center border border-gray-700 rounded overflow-hidden">
-        <!-- Tier Label -->
-        <div class="w-24 h-20 flex items-center justify-center text-xl font-bold text-black
-            {% if tier_name == 'S' %}bg-[#ff6b6b]
-            {% elif tier_name == 'A' %}bg-[#faaa5a]
-            {% elif tier_name == 'B' %}bg-[#ffd966]
-            {% elif tier_name == 'C' %}bg-[#ffff66]
-            {% elif tier_name == 'D' %}bg-[#99ff99]
-            {% else %}bg-gray-400
-            {% endif %}
-        ">
-        {{ tier_name }}
+<body class="min-h-screen flex items-center justify-center font-game py-10">
+  <div class="w-full max-w-4xl mx-auto p-4">
+    <div class="game-card bg-white rounded-3xl border-6 border-black p-8 relative overflow-hidden">
+      <!-- Decorative elements -->
+      <div class="absolute -top-10 -right-10 w-40 h-40 bg-black opacity-5 rounded-full"></div>
+      <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-black opacity-5 rounded-full"></div>
+      
+      <h1 class="text-3xl font-bold text-center mb-8 text-black relative">
+        <span class="relative inline-block">
+          Design Your Tierlist
+          <span class="absolute bottom-0 left-0 w-full h-2 bg-black opacity-20 rounded-full"></span>
+        </span>
+      </h1>
+      
+      <form action="{{ url_for('tierlist_proccessing') }}" method="POST" enctype="multipart/form-data" class="space-y-6 relative z-10">
+        <!-- Tierlist Container -->
+        <div id="tierlist-container" class="space-y-4 mb-6">
+          <!-- S Tier -->
+          <div class="tier-row flex items-center rounded-2xl border-4 border-black overflow-hidden">
+            <div class="w-24 h-20 flex items-center justify-center text-xl font-bold">
+              <input type="text" name="tier_names[]" value="S" maxlength="3" 
+                     class="tier-label w-full h-full text-center text-black bg-[#ff6b6b] focus:outline-none font-bold text-xl">
+            </div>
+            <div class="flex-1 min-h-[5rem] bg-gray-50 px-4 py-2 overflow-x-auto">
+              <div class="tier-items flex items-center space-x-3 min-h-[4rem]"></div>
+            </div>
+            <button type="button" class="delete-tier px-3 h-20 bg-black text-white hover:bg-gray-800 transition-colors">
+              ×
+            </button>
+          </div>
+          
+          <!-- A Tier -->
+          <div class="tier-row flex items-center rounded-2xl border-4 border-black overflow-hidden">
+            <div class="w-24 h-20 flex items-center justify-center text-xl font-bold">
+              <input type="text" name="tier_names[]" value="A" maxlength="3" 
+                     class="tier-label w-full h-full text-center text-black bg-[#faaa5a] focus:outline-none font-bold text-xl">
+            </div>
+            <div class="flex-1 min-h-[5rem] bg-gray-50 px-4 py-2 overflow-x-auto">
+              <div class="tier-items flex items-center space-x-3 min-h-[4rem]"></div>
+            </div>
+            <button type="button" class="delete-tier px-3 h-20 bg-black text-white hover:bg-gray-800 transition-colors">
+              ×
+            </button>
+          </div>
+          
+          <!-- B Tier -->
+          <div class="tier-row flex items-center rounded-2xl border-4 border-black overflow-hidden">
+            <div class="w-24 h-20 flex items-center justify-center text-xl font-bold">
+              <input type="text" name="tier_names[]" value="B" maxlength="3" 
+                     class="tier-label w-full h-full text-center text-black bg-[#ffd966] focus:outline-none font-bold text-xl">
+            </div>
+            <div class="flex-1 min-h-[5rem] bg-gray-50 px-4 py-2 overflow-x-auto">
+              <div class="tier-items flex items-center space-x-3 min-h-[4rem]"></div>
+            </div>
+            <button type="button" class="delete-tier px-3 h-20 bg-black text-white hover:bg-gray-800 transition-colors">
+              ×
+            </button>
+          </div>
         </div>
 
-
-        <!-- Tier Items -->
-        <div class="flex-1 min-h-[5rem] bg-[#1e1e1e] px-4 py-2 overflow-x-auto">
-          <ul class="flex items-center space-x-3">
-            {% if items %}
-              {% for item in items %}
-                <li class="bg-gray-800 border border-gray-600 px-4 py-2 rounded text-sm font-medium shadow whitespace-nowrap">
-                  {{ item }}
-                </li>
-              {% endfor %}
-            {% else %}
-
-            {% endif %}
-          </ul>
+        <!-- Add tier button -->
+        <div class="flex justify-center mb-6">
+          <button type="button" id="add-tier" class="game-button bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-2xl text-lg border-4 border-black">
+            Add Tier
+          </button>
         </div>
 
-      </div>
-    {% endfor %}
-    <script>
-      var socket = io()
-    </script>
+        <!-- Image upload section -->
+        <div class="mb-6 p-6 rounded-2xl border-4 border-black bg-gray-50">
+          <h2 class="text-xl font-bold mb-4 text-black">Add Images</h2>
+          <div class="mb-4">
+            <input type="file" id="image-upload" name="images[]" accept="image/*" multiple class="hidden">
+            <button type="button" id="upload-button" class="game-button bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-2xl text-lg border-4 border-black">
+              Select Images
+            </button>
+          </div>
+          <div id="image-preview" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
+            <!-- Image previews will be added here -->
+          </div>
+        </div>
+
+        <!-- Submit button -->
+        <div class="flex justify-center">
+          <button type="submit" class="game-button w-full bg-black hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-2xl text-xl mt-4 border-4 border-black">
+            Save Tier List
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
+
+  <script>
+    // Initialize socket
+    var socket = io();
+
+    // Tier colors mapping
+    const tierColors = {
+      'S': '#ff6b6b',
+      'A': '#faaa5a',
+      'B': '#ffd966',
+      'C': '#ffff66',
+      'D': '#99ff99',
+      'E': '#99ccff',
+      'F': '#cc99ff'
+    };
+
+    // Default tier names in order
+    const defaultTierNames = ['S', 'A', 'B', 'C', 'D', 'E', 'F'];
+    let nextTierIndex = 3; // Start with C since we already have S, A, B
+
+    // Add tier button functionality
+    document.getElementById('add-tier').addEventListener('click', function() {
+      const tierContainer = document.getElementById('tierlist-container');
+      const newTierName = defaultTierNames[nextTierIndex] || 'X';
+      const tierColor = tierColors[newTierName] || '#cccccc';
+      nextTierIndex = Math.min(nextTierIndex + 1, defaultTierNames.length);
+
+      const tierRow = document.createElement('div');
+      tierRow.className = 'tier-row flex items-center rounded-2xl border-4 border-black overflow-hidden';
+      tierRow.innerHTML = `
+        <div class="w-24 h-20 flex items-center justify-center text-xl font-bold">
+          <input type="text" name="tier_names[]" value="${newTierName}" maxlength="3" 
+                 class="tier-label w-full h-full text-center text-black focus:outline-none font-bold text-xl" style="background-color: ${tierColor}">
+        </div>
+        <div class="flex-1 min-h-[5rem] bg-gray-50 px-4 py-2 overflow-x-auto">
+          <div class="tier-items flex items-center space-x-3 min-h-[4rem]"></div>
+        </div>
+        <button type="button" class="delete-tier px-3 h-20 bg-black text-white hover:bg-gray-800 transition-colors">
+          ×
+        </button>
+      `;
+      tierContainer.appendChild(tierRow);
+
+      // Add event listener to the new delete button
+      tierRow.querySelector('.delete-tier').addEventListener('click', function() {
+        tierRow.remove();
+      });
+
+      // Add event listener to the new tier name input
+      const tierInput = tierRow.querySelector('input[name="tier_names[]"]');
+      tierInput.addEventListener('input', function() {
+        const newValue = this.value.toUpperCase();
+        if (tierColors[newValue]) {
+          this.style.backgroundColor = tierColors[newValue];
+        }
+      });
+    });
+
+    // Add event listeners to existing delete buttons
+    document.querySelectorAll('.delete-tier').forEach(button => {
+      button.addEventListener('click', function() {
+        this.closest('.tier-row').remove();
+      });
+    });
+
+    // Add event listeners to existing tier name inputs
+    document.querySelectorAll('input[name="tier_names[]"]').forEach(input => {
+      input.addEventListener('input', function() {
+        const newValue = this.value.toUpperCase();
+        if (tierColors[newValue]) {
+          this.style.backgroundColor = tierColors[newValue];
+        }
+      });
+    });
+
+    // Image upload functionality
+    document.getElementById('upload-button').addEventListener('click', function() {
+      document.getElementById('image-upload').click();
+    });
+
+    document.getElementById('image-upload').addEventListener('change', function(e) {
+      const files = e.target.files;
+      const imagePreview = document.getElementById('image-preview');
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) continue;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imgContainer = document.createElement('div');
+          imgContainer.className = 'image-preview relative group';
+          
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'w-full h-24 object-cover rounded-xl border-3 border-black';
+          
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'absolute top-1 right-1 bg-black text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity';
+          removeBtn.innerHTML = '×';
+          removeBtn.addEventListener('click', function() {
+            imgContainer.remove();
+          });
+          
+          
+          imgContainer.appendChild(img);
+          imgContainer.appendChild(removeBtn);
+          imagePreview.appendChild(imgContainer);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
 </body>
 </html>

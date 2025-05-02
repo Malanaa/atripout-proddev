@@ -3,45 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atripout - Game Options</title>
+  <title>Atripout</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            poppins: ['Poppins', 'sans-serif'],
+            game: ['Fredoka', 'sans-serif'],
           },
+          borderWidth: {
+            '3': '3px',
+            '6': '6px',
+          }
         }
       }
     }
   </script>
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Fredoka', sans-serif;
+      background-color: #f5f5f5;
+      background-image: radial-gradient(#000000 0.5px, transparent 0.5px), radial-gradient(#000000 0.5px, #f5f5f5 0.5px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+    }
+    
+    .game-card {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .game-button {
+      transition: all 0.2s;
+    }
+    
+    .game-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+    
+    .game-button:active {
+      transform: translateY(0);
     }
     
     .logo-container {
       position: relative;
       overflow: hidden;
-      height: 150px;
+      height: 180px;
       margin-bottom: 2rem;
     }
     
     .logo-text {
       position: relative;
       display: inline-block;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 4px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     }
     
     .letter {
       display: inline-block;
       position: relative;
       transition: transform 0.2s ease;
+      background: linear-gradient(145deg, #000000, #222222);
+      color: white;
+      border-radius: 12px;
+      padding: 5px 8px;
+      margin: 0 2px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
     
     .ball {
@@ -126,46 +158,57 @@
         bottom: 14.5px;
         width: 20px;
       }
+      
+      .letter {
+        padding: 3px 5px;
+        border-radius: 8px;
+        margin: 0 1px;
+      }
     }
   </style>
 </head>
-<body class=" bg-gray-50 min-h-screen flex items-center justify-center font-poppins">
-  <div class="flex flex-col items-center space-y-4 sm:space-y-6 md:space-y-8 p-4 sm:p-6 w-full max-w-md mx-auto">
-    <!-- Animated Logo -->
-    <div class="logo-container w-full text-center">
-      <h1 class="logo-text text-4xl sm:text-5xl md:text-6xl">
-        <span class="letter">A</span>
-        <span class="letter">t</span>
-        <span class="letter">r</span>
-        <span class="letter">i</span>
-        <span class="letter">p</span>
-        <span class="letter">o</span>
-        <span class="letter">u</span>
-        <span class="letter">t</span>
-      </h1>
+<body class="min-h-screen flex items-center justify-center font-game">
+  <div class="flex flex-col items-center space-y-6 p-6 w-full max-w-md mx-auto">
+    <!-- Game Card Container -->
+    <div class="game-card bg-white rounded-3xl border-6 border-black p-8 w-full">
+      <!-- Animated Logo (Preserved as requested) -->
+      <div class="logo-container w-full text-center">
+        <h1 class="logo-text text-4xl sm:text-5xl md:text-6xl">
+          <span class="letter">A</span>
+          <span class="letter">t</span>
+          <span class="letter">r</span>
+          <span class="letter">i</span>
+          <span class="letter">p</span>
+          <span class="letter">o</span>
+          <span class="letter">u</span>
+          <span class="letter">t</span>
+        </h1>
+        
+        <!-- Bouncing Ball -->
+        <div class="ball"></div>
+        
+        <!-- Smoother, Wider Road -->
+        <div class="road"></div>
+        
+        <!-- Road Dashes -->
+        <div class="road-dash" style="left: 10%"></div>
+        <div class="road-dash" style="left: 25%"></div>
+        <div class="road-dash" style="left: 40%"></div>
+        <div class="road-dash" style="left: 55%"></div>
+        <div class="road-dash" style="left: 70%"></div>
+        <div class="road-dash" style="left: 85%"></div>
+      </div>
       
-      <!-- Bouncing Ball -->
-      <div class="ball"></div>
-      
-      <!-- Smoother, Wider Road -->
-      <div class="road"></div>
-      
-      <!-- Road Dashes -->
-      <div class="road-dash" style="left: 10%"></div>
-      <div class="road-dash" style="left: 25%"></div>
-      <div class="road-dash" style="left: 40%"></div>
-      <div class="road-dash" style="left: 55%"></div>
-      <div class="road-dash" style="left: 70%"></div>
-      <div class="road-dash" style="left: 85%"></div>
+      <!-- Buttons -->
+      <div class="space-y-4">
+        <a href="{{url_for('join_game')}}" class="game-button block w-full bg-black hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-2xl text-xl text-center border-4 border-black">
+          Join Game
+        </a>
+        <a href="{{url_for('create_game')}}" class="game-button block w-full bg-black hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-2xl text-xl text-center border-4 border-black">
+          Create Game
+        </a>
+      </div>
     </div>
-    
-    <!-- Buttons -->
-    <a  href="{{url_for('join_game')}}" class="bg-black hover:bg-gray-800 text-white font-medium py-3 sm:py-4 px-6 sm:px-10 rounded-lg w-full sm:w-72 md:w-80 lg:w-96 transition duration-200 shadow-md text-base sm:text-lg">
-      Join Game
-    </a>
-    <a href="{{url_for('create_game')}}" class="bg-black hover:bg-gray-800 text-white font-medium py-3 sm:py-4 px-6 sm:px-10 rounded-lg w-full sm:w-72 md:w-80 lg:w-96 transition duration-200 shadow-md text-base sm:text-lg">
-      Create Game
-    </a>
   </div>
 
   <script>

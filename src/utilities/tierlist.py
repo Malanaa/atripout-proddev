@@ -10,6 +10,13 @@ class TierList:
         self.tiers = {DEFAULT_TIERS[i]: [] for i in range(len(DEFAULT_TIERS))}
         self.images = []
 
-
+    def to_dict(self):
+        return {
+            "room_id": self.room_id,
+            "uuid": self.uuid,
+            "size_tiers": self.size_tiers,
+            "tiers": self.tiers,
+            "images": self.images
+        }
 
 

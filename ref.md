@@ -1,16 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atripout</title>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-</head>
-<body>
-
-    <p>Hello World</p>
-    
-    <script>
+Socket Refrence Script.
+<script>
         var socket = io();
         let send_message = "Hello from a client"
 
@@ -32,11 +21,4 @@
           document.body.appendChild(message);
 
         });
-    
-        
-      </script>
-
-</body>
-
-
-</html>
+</script>

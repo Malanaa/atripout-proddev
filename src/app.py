@@ -10,9 +10,9 @@ import uuid
 from PIL import Image
 import io
 
-# APP_OBJECT
+
 app = Flask("__name__")
-app.config["SECRET_KEY"] = "temporary_please_do_not_forget_to_change!"
+app.config["SECRET_KEY"] = "temp"  # Change to secure string stored in dotenv.
 socketio = SocketIO(app)
 
 
@@ -26,61 +26,61 @@ def home():
 def create_game():
     if request.method == "POST":
         player_number = request.form.get("playerNumber")
-        anonymous = request.form.get("anonymous") == "yes"
+        is_anonymous = request.form.get("anonymous") == "yes"
+        # Redirects to a middleman endpoint which initializes the tierlist and gamesession.
         return redirect(
-            url_for("tierlist_proccessing", isAnon=anonymous, numPlayers=player_number)
+            url_for(
+                "tierlist_proccessing", is_anon=is_anonymous, player_num=player_number
+            )
         )
-    # send tierlistobjects and like set up a tierlits room.
     return render_template("create_game.html")
 
 
-# Im unsure if this will work, but I dont thinkj I always need static names.
-@app.route(f"/tierlist-processing", methods=["POST", "GET"])
+# The app route is a random string. I want to make it so that this endpoint is not accesible.
+@app.route(f"/{str(uuid.uuid4())}", methods=["POST", "GET"])
 def tierlist_proccessing():
-    is_anon = request.args.get("isAnon")
-    num_players = request.args.get("numPlayers")
-    tierlist = tr.TierList()
-    if request.method == "POST":
-        # game_session = gs.GameSession(num_players, tierlist)
-        # game_session.anon = is_anon
 
-        # Byte64 image array
+    is_anon = request.args.get("is_anon")
+    num_players = request.args.get("player_num")
+
+    if request.method == "POST":
+
+        tierlist = tr.TierList()
+        game_session = gs.GameSession(num_players, tierlist)
+        game_session.anonymous = is_anon
+
+        # Reading in the data from the post request.
         images = request.files.getlist("images[]")
         tiernames = request.form.getlist("tier_names[]")
-        
-        tierlist.tiers = tiernames
-        tierlist.size_tiers = len(tiernames)
 
+        # Tierlist customization.
+        tierlist.tiers = tiernames
         tierlist_id = mongo_tierlists.insert_one(tierlist.to_dict()).inserted_id
-        # saving the images to s3
+
+        # Saving every image to s3, while adding them to the tierlists image array.
         for file in images:
-            img_io_in = io.BytesIO(file.read()) 
+            img_io_in = io.BytesIO(file.read())
             img = Image.open(img_io_in)
             img = img.convert("RGB")
             img_io_out = io.BytesIO()
             img.save(img_io_out, format="JPEG", quality=85, optimize=True)
             img_io_out.seek(0)
 
-            unique_key = (uuid.uuid4())
+            unique_key = str(uuid.uuid4())
             s3.upload_fileobj(
-            img_io_out,
-            "atripout-images",
-            unique_key,
-            ExtraArgs={
-            "ACL": "public-read",
-            "ContentType": "image/jpeg", #Jpeg specifier
-            },
+                img_io_out,
+                "atripout-images",
+                unique_key,
+                ExtraArgs={
+                    "ACL": "public-read",
+                    "ContentType": "image/jpeg",  # JPEG specifier.
+                },
             )
-            s3_url = f"https://atripout-images.s3.us-east-2.amazonaws.com/{unique_key}"
-            mongo_tierlists.update_one({"_id": tierlist_id}, {"$set": {"image_url": s3_url}})
-
-        print(len(tiernames), len(images))  
-
-
-        # get all relevant data to attach to the teirlist which then u attach to the game session
-        # request.form.get()
-        pass
-    return render_template("middleman_tierlist.html")
+            s3_url = f"https://atripout-images.s3.us-east-1.amazonaws.com/{unique_key}"
+            mongo_tierlists.update_one(
+                {"_id": tierlist_id}, {"$push": {"images": s3_url}}
+            )
+    return render_template("tier_proccesing.html")
 
 
 # Defining n-directional sockets (socketio rooms)
@@ -93,6 +93,16 @@ def on_join(data):
     print(f"{username} has joined {room}")
 
 
+# Under Works
+@app.route("/join")
+def join_game():
+    return render_template("index.html")
+
+
+# Sockets Handling
+
+
+# Room Based Socket Netowrking
 @socketio.on("leave_room")
 def on_leave(data):
     username = data["username"]
@@ -109,37 +119,9 @@ def handle_send_message(data):
     emit("room_message", message, to=room)
 
 
-@app.route("/test")
-def test():
-    return render_template("home.html")
-
-
-@app.route("/join")
-def join_game():
-    return render_template("index.html")
-
-
-@app.route("/sample_tierlist")
-def sample_tierlist():
-    sample_tierlist = tr.TierList()
-    return render_template("sample_tierlist.html", tierlist=sample_tierlist)
-
-
+# General Based Socket Netowrking
 @socketio.on("send_text_to_server")
 def handle_test_send_event(msg):
     print(f"message from client: {msg}")
     time.sleep(2)
     socketio.emit("send_text_to_client", input(f"{msg}: "))
-
-
-# @socketio.on('message')
-# def handle_message(msg):
-#     print(f"Logged Message : {msg}")
-#     socketio.emit('second_response', {'data': 'Message received!'})
-
-# @socketio.on('gang')
-# def handle_gang(msg):
-#     print(f"gang messagiung wow : {msg}")
-#     socketio.emit('response', {'data': 'GANG Message received!'})
-# if __name__ == '__main__':
-#     socketio.run(app)

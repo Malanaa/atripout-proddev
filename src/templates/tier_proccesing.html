@@ -92,7 +92,7 @@
           <!-- S Tier -->
           <div class="tier-row flex items-center rounded-2xl border-4 border-black overflow-hidden">
             <div class="w-24 h-20 flex items-center justify-center text-xl font-bold">
-              <input type="text" name="tier_names[]" value="S" maxlength="3" 
+              <input type="text" name="tier_names[]" value="S" maxlength="10" 
                      class="tier-label w-full h-full text-center text-black bg-[#ff6b6b] focus:outline-none font-bold text-xl">
             </div>
             <div class="flex-1 min-h-[5rem] bg-gray-50 px-4 py-2 overflow-x-auto">
@@ -106,7 +106,7 @@
           <!-- A Tier -->
           <div class="tier-row flex items-center rounded-2xl border-4 border-black overflow-hidden">
             <div class="w-24 h-20 flex items-center justify-center text-xl font-bold">
-              <input type="text" name="tier_names[]" value="A" maxlength="3" 
+              <input type="text" name="tier_names[]" value="A" maxlength="10" 
                      class="tier-label w-full h-full text-center text-black bg-[#faaa5a] focus:outline-none font-bold text-xl">
             </div>
             <div class="flex-1 min-h-[5rem] bg-gray-50 px-4 py-2 overflow-x-auto">
@@ -120,7 +120,7 @@
           <!-- B Tier -->
           <div class="tier-row flex items-center rounded-2xl border-4 border-black overflow-hidden">
             <div class="w-24 h-20 flex items-center justify-center text-xl font-bold">
-              <input type="text" name="tier_names[]" value="B" maxlength="3" 
+              <input type="text" name="tier_names[]" value="B" maxlength="10" 
                      class="tier-label w-full h-full text-center text-black bg-[#ffd966] focus:outline-none font-bold text-xl">
             </div>
             <div class="flex-1 min-h-[5rem] bg-gray-50 px-4 py-2 overflow-x-auto">
@@ -156,7 +156,7 @@
         <!-- Submit button -->
         <div class="flex justify-center">
           <button type="submit" class="game-button w-full bg-black hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-2xl text-xl mt-4 border-4 border-black">
-            Save Tier List
+            Continue
           </button>
         </div>
       </form>
@@ -164,9 +164,6 @@
   </div>
 
   <script>
-    // Initialize socket
-    var socket = io();
-
     // Tier colors mapping
     const tierColors = {
       'S': '#ff6b6b',
@@ -193,7 +190,7 @@
       tierRow.className = 'tier-row flex items-center rounded-2xl border-4 border-black overflow-hidden';
       tierRow.innerHTML = `
         <div class="w-24 h-20 flex items-center justify-center text-xl font-bold">
-          <input type="text" name="tier_names[]" value="${newTierName}" maxlength="3" 
+          <input type="text" name="tier_names[]" value="${newTierName}" maxlength="10" 
                  class="tier-label w-full h-full text-center text-black focus:outline-none font-bold text-xl" style="background-color: ${tierColor}">
         </div>
         <div class="flex-1 min-h-[5rem] bg-gray-50 px-4 py-2 overflow-x-auto">

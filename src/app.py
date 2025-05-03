@@ -36,50 +36,68 @@ def create_game():
     return render_template("create_game.html")
 
 
-# The app route is a random string. I want to make it so that this endpoint is not accesible.
-@app.route(f"/{str(uuid.uuid4())}", methods=["POST", "GET"])
+@app.route("/desgin_x11c", methods=["POST", "GET"])
 def tierlist_proccessing():
-
     is_anon = request.args.get("is_anon")
     num_players = request.args.get("player_num")
 
     if request.method == "POST":
 
         tierlist = tr.TierList()
+
         game_session = gs.GameSession(num_players, tierlist)
         game_session.anonymous = is_anon
 
         # Reading in the data from the post request.
         images = request.files.getlist("images[]")
         tiernames = request.form.getlist("tier_names[]")
+        tierlist_name = request.form.get("tierlist_name")
 
+        print(tierlist_name)
         # Tierlist customization.
         tierlist.tiers = tiernames
+        tierlist.name = tierlist_name
         tierlist_id = mongo_tierlists.insert_one(tierlist.to_dict()).inserted_id
 
         # Saving every image to s3, while adding them to the tierlists image array.
-        for file in images:
-            img_io_in = io.BytesIO(file.read())
-            img = Image.open(img_io_in)
-            img = img.convert("RGB")
-            img_io_out = io.BytesIO()
-            img.save(img_io_out, format="JPEG", quality=85, optimize=True)
-            img_io_out.seek(0)
+        if len(images) > 0:
+            # somewhat redundant, but lets let it be.
+            for file in images:
 
-            unique_key = str(uuid.uuid4())
-            s3.upload_fileobj(
-                img_io_out,
-                "atripout-images",
-                unique_key,
-                ExtraArgs={
-                    "ACL": "public-read",
-                    "ContentType": "image/jpeg",  # JPEG specifier.
-                },
-            )
-            s3_url = f"https://atripout-images.s3.us-east-1.amazonaws.com/{unique_key}"
-            mongo_tierlists.update_one(
-                {"_id": tierlist_id}, {"$push": {"images": s3_url}}
-            )
+                # "null" check.
+                if file.filename == "" or file.content_length == 0:
+                    continue
+
+                img_io_in = io.BytesIO(file.read())
+                if img_io_in.getbuffer().nbytes == 0:
+                    continue
+
+                img_io_in = io.BytesIO(file.read())
+                img = Image.open(img_io_in)
+                img = img.convert("RGB")
+                img_io_out = io.BytesIO()
+                img.save(img_io_out, format="JPEG", quality=85, optimize=True)
+                img_io_out.seek(0)
+
+                unique_key = str(uuid.uuid4())
+                s3.upload_fileobj(
+                    img_io_out,
+                    "atripout-images",
+                    unique_key,
+                    ExtraArgs={
+                        "ACL": "public-read",
+                        "ContentType": "image/jpeg",  # JPEG specifier.
+                    },
+                )
+                s3_url = (
+                    f"https://atripout-images.s3.us-east-1.amazonaws.com/{unique_key}"
+                )
+                mongo_tierlists.update_one(
+                    {"_id": tierlist_id}, {"$push": {"images": s3_url}}
+                )
+        # Resetting images because I think it's holding data.
+        images = []
+        return redirect(url_for("home"))
     return render_template("tier_proccesing.html")
 
 

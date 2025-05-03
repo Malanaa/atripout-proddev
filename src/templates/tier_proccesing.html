@@ -89,6 +89,12 @@
       <form action="{{ url_for('tierlist_proccessing') }}" method="POST" enctype="multipart/form-data" class="space-y-6 relative z-10">
         <!-- Tierlist Container -->
         <div id="tierlist-container" class="space-y-4 mb-6">
+          <div class="mb-6">
+            <label for="tierlist-name" class="block text-lg font-bold text-black mb-2">Tierlist Name</label>
+            <input type="text" id="tierlist_name" name="tierlist_name" maxlength="100"
+                   placeholder="Enter tierlist name"
+                   class="game-input w-full rounded-2xl border-4 border-black px-4 py-3 text-lg focus:outline-none">
+          </div>
           <!-- S Tier -->
           <div class="tier-row flex items-center rounded-2xl border-4 border-black overflow-hidden">
             <div class="w-24 h-20 flex items-center justify-center text-xl font-bold">

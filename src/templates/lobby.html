@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lobby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            game: ['Fredoka', 'sans-serif'],
+          },
+          borderWidth: {
+            '3': '3px',
+            '6': '6px',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background-color: #f5f5f5;
+      background-image: radial-gradient(#000000 0.5px, transparent 0.5px), radial-gradient(#000000 0.5px, #f5f5f5 0.5px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+    }
+    
+    .game-card {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .game-button {
+      transition: all 0.2s;
+    }
+    
+    .game-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+    
+    .game-button:active {
+      transform: translateY(0);
+    }
+    
+    .player-card {
+      transition: all 0.2s;
+    }
+    
+    .player-card:hover {
+      transform: translateY(-2px);
+    }
+    
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        opacity: 0.6;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0.6;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen font-game py-10 px-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header with Game ID -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-black relative inline-block">
+        <span class="relative">
+            Lobby
+          <span class="absolute bottom-0 left-0 w-full h-2 bg-black opacity-20 rounded-full"></span>
+        </span>
+      </h1>
+      {% if tierlist and game_session %}
+        <p class="mt-2 text-gray-700">Game ID: <span class="font-bold">{{ game_session.room_id }}</span></p>
+      {% endif %}
+    </div>
+    
+    <div class="flex flex-col lg:flex-row gap-6">
+      <!-- Tierlist Section -->
+      <div class="w-full lg:w-3/5">
+        <div class="game-card bg-white rounded-3xl border-6 border-black p-6 relative overflow-hidden">
+          <!-- Decorative elements -->
+          <div class="absolute -top-10 -right-10 w-40 h-40 bg-black opacity-5 rounded-full"></div>
+          <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-black opacity-5 rounded-full"></div>
+          
+          <h2 class="text-2xl font-bold text-black mb-6 relative inline-block">
+            <span class="relative">
+              {% if tierlist and game_session %}
+                {{tierlist.name}}
+              {% endif %}
+              <span class="absolute bottom-0 left-0 w-full h-2 bg-black opacity-20 rounded-full"></span>
+            </span>
+          </h2>
+          
+          {% if tierlist and game_session %}
+            <div class="space-y-4">
+              {% for tier in tierlist.tiers %}
+                <div class="flex items-center rounded-2xl border-4 border-black overflow-hidden">
+                  <div class="w-24 h-16 flex items-center justify-center text-xl font-bold text-black
+                    {% if tier == 'S' %}bg-[#ff6b6b]
+                    {% elif tier == 'A' %}bg-[#faaa5a]
+                    {% elif tier == 'B' %}bg-[#ffd966]
+                    {% elif tier == 'C' %}bg-[#ffff66]
+                    {% elif tier == 'D' %}bg-[#99ff99]
+                    {% elif tier == 'E' %}bg-[#99ccff]
+                    {% elif tier == 'F' %}bg-[#cc99ff]
+                    {% else %}bg-gray-300
+                    {% endif %}">
+                    {{ tier }}
+                  </div>
+                  <div class="flex-1 min-h-[4rem] bg-gray-50 px-4 py-2 overflow-x-auto">
+                    <div class="flex items-center space-x-3 min-h-[3rem]"></div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            
+            {% if tierlist.images %}
+              <div class="mt-6">
+                <h3 class="text-lg font-bold text-black mb-3">Images</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {% for image_url in tierlist.images %}
+                    <div class="aspect-square rounded-xl border-3 border-black overflow-hidden">
+                      <img src="{{ image_url }}" alt="Tierlist image" class="w-full h-full object-cover">
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% else %}
+              <div class="mt-6 text-center p-4 bg-gray-50 rounded-xl border-3 border-black">
+                <p class="text-gray-500">No images available</p>
+              </div>
+            {% endif %}
+          {% else %}
+            <div class="text-center p-8 bg-gray-50 rounded-xl border-3 border-black">
+              <p class="text-gray-500">Tierlist not available</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Lobby Section -->
+      <div class="w-full lg:w-2/5">
+        <div class="game-card bg-white rounded-3xl border-6 border-black p-6 relative overflow-hidden mb-6">
+          <!-- Decorative elements -->
+          <div class="absolute -top-10 -right-10 w-40 h-40 bg-black opacity-5 rounded-full"></div>
+          
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-black relative inline-block">
+              <span class="relative">
+                Game Status
+                <span class="absolute bottom-0 left-0 w-full h-2 bg-black opacity-20 rounded-full"></span>
+              </span>
+            </h2>
+            <div class="flex items-center">
+              <span class="w-3 h-3 bg-green-500 rounded-full pulse-animation mr-2"></span>
+              <span class="font-medium">Waiting for players</span>
+            </div>
+          </div>
+          
+          <div class="bg-gray-50 rounded-xl border-3 border-black p-4 mb-4">
+            <div class="flex justify-between items-center">
+                {%if tierlist and game_session%}
+              <span class="font-medium">Players joined:</span>
+              <span class="font-bold text-lg">3/{{game_session.num_players}}</span>
+                {% endif %}
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3 mt-2">
+              <div class="bg-black h-3 rounded-full" style="width: 37.5%"></div>
+            </div>
+          </div>
+          
+          <div class="flex justify-center">
+            <button class="game-button bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-2xl text-lg border-4 border-black">
+              Start Game
+            </button>
+          </div>
+        </div>
+        
+        <div class="game-card bg-white rounded-3xl border-6 border-black p-6 relative overflow-hidden">
+          <!-- Decorative elements -->
+          <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-black opacity-5 rounded-full"></div>
+          
+          <h2 class="text-2xl font-bold text-black mb-6 relative inline-block">
+            <span class="relative">
+              Players
+              <span class="absolute bottom-0 left-0 w-full h-2 bg-black opacity-20 rounded-full"></span>
+            </span>
+          </h2>
+          
+          <div class="space-y-3">
+            <!-- Player 1 -->
+            <div class="player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3">
+              <div class="w-10 h-10 rounded-full bg-[#ff6b6b] border-2 border-black flex items-center justify-center font-bold text-black">
+                1
+              </div>
+              <div class="ml-3">
+                <p class="font-bold">Player 1</p>
+                <p class="text-sm text-gray-500">Host</p>
+              </div>
+              <div class="ml-auto">
+                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-400">
+                  Ready
+                </span>
+              </div>
+            </div>
+            
+            <!-- Player 2 -->
+            <div class="player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3">
+              <div class="w-10 h-10 rounded-full bg-[#faaa5a] border-2 border-black flex items-center justify-center font-bold text-black">
+                2
+              </div>
+              <div class="ml-3">
+                <p class="font-bold">Player 2</p>
+              </div>
+              <div class="ml-auto">
+                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-400">
+                  Ready
+                </span>
+              </div>
+            </div>
+            
+            <!-- Player 3 -->
+            <div class="player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3">
+              <div class="w-10 h-10 rounded-full bg-[#ffd966] border-2 border-black flex items-center justify-center font-bold text-black">
+                3
+              </div>
+              <div class="ml-3">
+                <p class="font-bold">Player 3</p>
+              </div>
+              <div class="ml-auto">
+                <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-yellow-400">
+                  Not Ready
+                </span>
+              </div>
+            </div>
+            
+            <!-- Empty slots -->
+            <div class="player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3 opacity-50">
+              <div class="w-10 h-10 rounded-full bg-gray-300 border-2 border-black flex items-center justify-center font-bold text-black">
+                ?
+              </div>
+              <div class="ml-3">
+                <p class="font-bold">Waiting for player...</p>
+              </div>
+            </div>
+            
+            <div class="player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3 opacity-50">
+              <div class="w-10 h-10 rounded-full bg-gray-300 border-2 border-black flex items-center justify-center font-bold text-black">
+                ?
+              </div>
+              <div class="ml-3">
+                <p class="font-bold">Waiting for player...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer with buttons -->
+    <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+      <button class="game-button bg-gray-200 hover:bg-gray-300 text-black font-bold py-3 px-6 rounded-2xl text-lg border-4 border-black">
+        Copy Invite Link
+      </button>
+      <a href="#" class="game-button bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-2xl text-lg border-4 border-black text-center">
+        Leave Game
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // Initialize socket
+    var socket = io();
+    
+    // Copy invite link functionality
+    document.querySelector('button:contains("Copy Invite Link")').addEventListener('click', function() {
+      const dummyLink = window.location.href;
+      navigator.clipboard.writeText(dummyLink).then(() => {
+        alert('Invite link copied to clipboard!');
+      });
+    });
+  </script>
+</body>
+</html>

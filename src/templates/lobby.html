@@ -185,12 +185,15 @@
             </div>
           </div>
           
+        {% if session['is_host'] %}
+          <!-- make this into a form which sends a post request to my enoiint to start game -->
           <div class="flex justify-center">
             <button class="game-button bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-2xl text-lg border-4 border-black">
               Start Game
             </button>
           </div>
         </div>
+        {% endif %}
         
         <div class="game-card bg-white rounded-3xl border-6 border-black p-6 relative overflow-hidden">
          
@@ -230,9 +233,10 @@
     users = users.users; 
     let count_req_for_user = 0;
     console.log("Users is:", users);
-    socket.emit("join_room", {"room": "{{game_session['room_id']}}", "username": "{{session['game_name']}}" })
-    socket.on('joined_room', function(data) {
+    socket.emit("room_listerner_server", {"room": "{{game_session['room_id']}}", "username": "{{session['game_name']}}" })
+    socket.on('room_listerner_client', function(data) {
         username = data['username'];
+        if(username){
         if (count_req_for_user !== 0) {
             users.push(username);
         }
@@ -240,6 +244,11 @@
         console.log(username + " Joined a game");
         count_req_for_user++;
         renderPlayers();
+        }
+
+        if (data['game_start'] === true){
+            //send everyone here to /designtierlist.
+        }
     });
     
     // Helper to render player cards

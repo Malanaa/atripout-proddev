@@ -58,6 +58,7 @@ def tierlist_proccessing():
     game_name = request.args.get("game_name")
 
     session["game_name"] = game_name
+    session["is_host"] = True
 
     # As issue occurs, when the user enters no images. Fix pending.
     if request.method == "POST":
@@ -125,19 +126,39 @@ def lobby():
     users = mongo_game_sessions.find_one(
         {"room_id": session["room_id"]}, {"users": 1, "_id": 0}
     )
+
+    if request == "POST":
+        is_game_start = request.form.get("is_game_start")
+        if is_game_start:
+            socketio.emit(
+                "room_listerner_client", {"game_start": True}, to=session["room_id"]
+            )
+
     return render_template(
         "lobby.html", game_session=game_session, tierlist=tierlist, users=users
     )
 
 
+@app.route("/yourtierlist", methods=["POST", "GET"])
+def user_tierlist():
+    game_session = mongo_game_sessions.find_one({"room_id": session["room_id"]})
+    tierlist_uuid = game_session["tierlist_uuid"]
+    tierlist = mongo_tierlists.find_one({"uuid": tierlist_uuid})
+
+    tierlist["is_template"] = False
+    print(tierlist)
+
+    return redirect(url_for("home"))
+
+
 # Defining n-directional sockets (socketio rooms)
 # Join Room Listener
-@socketio.on("join_room")
+@socketio.on("room_listerner_server")
 def on_join(data):
     username = data["username"]
     room = data["room"]
     join_room(room)
-    socketio.emit("joined_room", {"username": session["game_name"]}, to=room)
+    socketio.emit("room_listerner_client", {"username": session["game_name"]}, to=room)
     print(
         f"[{datetime.now():%Y-%m-%d %H:%M:%S}] User '{username}' has joined room '{room}'."
     )

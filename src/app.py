@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, session
 from flask_socketio import SocketIO, join_room, leave_room, emit
 from utilities import tierlist as tr
 from utilities import game_session as gs
@@ -9,6 +9,7 @@ import time
 import uuid
 from PIL import Image
 import io
+from datetime import datetime
 
 
 app = Flask("__name__")
@@ -19,27 +20,44 @@ socketio = SocketIO(app)
 @app.route("/")
 @app.route("/home")
 def home():
+    session.clear()
     return render_template("index.html")
+
+
+@app.route("/join", methods=["POST", "GET"])
+def join_game():
+    if request.method == "POST":
+        room_id = request.form.get("room_id")
+        game_name = request.form.get("game_name")
+
+        session["room_id"] = room_id
+        session["game_name"] = game_name
+
+        return redirect(url_for("lobby"))
+    return render_template("join_game.html")
 
 
 @app.route("/create", methods=["POST", "GET"])
 def create_game():
     if request.method == "POST":
         player_number = request.form.get("playerNumber")
+        game_name = request.form.get("game_name")
         # Redirects to a middleman endpoint which initializes the tierlist and gamesession.
         return redirect(
             url_for(
-                "tierlist_proccessing", num_players=player_number
+                "tierlist_proccessing", num_players=player_number, game_name=game_name
             )
         )
     return render_template("create_game.html")
 
 
-@app.route("/desgin_x11c", methods=["POST", "GET"])
+@app.route("/design", methods=["POST", "GET"])
 def tierlist_proccessing():
 
     num_players = request.args.get("num_players")
-    print(num_players)
+    game_name = request.args.get("game_name")
+
+    session["game_name"] = game_name
 
     # As issue occurs, when the user enters no images. Fix pending.
     if request.method == "POST":
@@ -62,7 +80,7 @@ def tierlist_proccessing():
         # Game Session Customization
         game_session.tierlist_id = tierlist.uuid
         game_session.num_players = num_players
-
+        # Somwhat redundant, but trust.
 
         for file in images:
             img_io_in = io.BytesIO(file.read())
@@ -87,39 +105,42 @@ def tierlist_proccessing():
                 {"_id": tierlist_id}, {"$push": {"images": s3_url}}
             )
         mongo_game_sessions.insert_one(game_session.to_dict())
-        return redirect(
-            url_for(
-                "lobby",
-                game_session_id=game_session.game_session_id,
-                tierlist_uuid=tierlist.uuid,
-            )
-        )
+
+        # Specifically for the player who made the game
+        session["room_id"] = game_session.room_id
+
+        return redirect(url_for("lobby"))
     return render_template("tier_proccesing.html", num_players=num_players)
 
 
 @app.route("/lobby", methods=["POST", "GET"])
 def lobby():
-    game_session_id = request.args.get("game_session_id")
-    game_session = mongo_game_sessions.find_one({"game_session_id": game_session_id})
-    tierlist_uuid = request.args.get("tierlist_uuid")
+
+    game_session = mongo_game_sessions.find_one({"room_id": session["room_id"]})
+    tierlist_uuid = game_session["tierlist_uuid"]
     tierlist = mongo_tierlists.find_one({"uuid": tierlist_uuid})
-    return render_template("lobby.html", game_session=game_session, tierlist=tierlist)
+    mongo_game_sessions.update_one(
+        {"room_id": session["room_id"]}, {"$push": {"users": session["game_name"]}}
+    )
+    users = mongo_game_sessions.find_one(
+        {"room_id": session["room_id"]}, {"users": 1, "_id": 0}
+    )
+    return render_template(
+        "lobby.html", game_session=game_session, tierlist=tierlist, users=users
+    )
 
 
 # Defining n-directional sockets (socketio rooms)
+# Join Room Listener
 @socketio.on("join_room")
 def on_join(data):
     username = data["username"]
     room = data["room"]
-    join_room(room)  # I assume this is some sort of uid for each room sepratly
-    emit("room_response", f"{username} has joined session = {room}", to=room)
-    print(f"{username} has joined {room}")
-
-
-# Under Works
-@app.route("/join")
-def join_game():
-    return render_template("index.html")
+    join_room(room)
+    socketio.emit("joined_room", {"username": session["game_name"]}, to=room)
+    print(
+        f"[{datetime.now():%Y-%m-%d %H:%M:%S}] User '{username}' has joined room '{room}'."
+    )
 
 
 # Sockets Handling

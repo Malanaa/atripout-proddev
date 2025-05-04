@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create</title>
+  <title>Join</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -91,43 +91,44 @@
       
       <h1 class="text-3xl font-bold text-center mb-8 text-black relative">
         <span class="relative inline-block">
-          Create Game
+          Join Game
           <span class="absolute bottom-0 left-0 w-full h-2 bg-black opacity-20 rounded-full"></span>
         </span>
       </h1>
       
-      <form action="#" method="POST" class="space-y-6 relative z-10">
-        <!-- Player Number Input -->
+      <form action="{{url_for('join_game')}}" method="POST" class="space-y-6 relative z-10">
+        <!-- Room ID Input -->
         <div class="space-y-3">
-          <label for="playerNumber" class="block text-lg font-medium text-black">How many players</label>
-          <input 
-            type="number" 
-            id="playerNumber" 
-            name="playerNumber" 
-            min="1" 
-            max="99" 
-            placeholder="Number of Players" 
-            class="game-input w-full px-5 py-4 rounded-2xl border-4 border-black bg-gray-50 focus:outline-none focus:border-gray-700 text-lg transition-all duration-200"
-            required
-          >
-        </div>
-        <div class="space-y-3">
-          <label for="game_name" class="block text-lg font-medium text-black">In Game Name</label>
+          <label for="room_id" class="block text-lg font-medium text-black">GameID</label>
           <input 
             type="text" 
-            id="game_name" 
-            name="game_name" 
+            id="room_id" 
+            name="room_id" 
             placeholder="" 
             class="game-input w-full px-5 py-4 rounded-2xl border-4 border-black bg-gray-50 focus:outline-none focus:border-gray-700 text-lg transition-all duration-200"
             required
           >
         </div>
+        
+        <!-- In Game Name Input -->
+        <div class="space-y-3">
+            <label for="game_name" class="block text-lg font-medium text-black">In Game Name</label>
+            <input 
+              type="text" 
+              id="game_name" 
+              name="game_name" 
+              placeholder="" 
+              class="game-input w-full px-5 py-4 rounded-2xl border-4 border-black bg-gray-50 focus:outline-none focus:border-gray-700 text-lg transition-all duration-200"
+              required
+            >
+          </div>
+
         <!-- Submit Button -->
         <button 
           type="submit" 
           class="game-button w-full bg-black hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-2xl text-xl mt-8 border-4 border-black"
         >
-          Create Game
+          Join Game
         </button>
         
         <!-- Back Button -->

@@ -8,6 +8,7 @@ class GameSession:
         self.room_id = f"{random.randint(0, 999999):06d}"
         self.num_players = num_players
         self.tierlist_id = None
+        self.users = []
 
     def to_dict(self):
         return {
@@ -15,4 +16,5 @@ class GameSession:
             "room_id": self.room_id,
             "num_players": self.num_players,
             "tierlist_uuid": self.tierlist_id,
+            "users": self.users
         }

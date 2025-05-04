@@ -193,108 +193,110 @@
         </div>
         
         <div class="game-card bg-white rounded-3xl border-6 border-black p-6 relative overflow-hidden">
-          <!-- Decorative elements -->
-          <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-black opacity-5 rounded-full"></div>
-          
-          <h2 class="text-2xl font-bold text-black mb-6 relative inline-block">
-            <span class="relative">
-              Players
-              <span class="absolute bottom-0 left-0 w-full h-2 bg-black opacity-20 rounded-full"></span>
-            </span>
-          </h2>
-          
-          <div class="space-y-3">
-            <!-- Player 1 -->
-            <div class="player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3">
-              <div class="w-10 h-10 rounded-full bg-[#ff6b6b] border-2 border-black flex items-center justify-center font-bold text-black">
-                1
-              </div>
-              <div class="ml-3">
-                <p class="font-bold">Player 1</p>
-                <p class="text-sm text-gray-500">Host</p>
-              </div>
-              <div class="ml-auto">
-                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-400">
-                  Ready
-                </span>
-              </div>
+         
+            <!-- Player count -->
+            <div class="flex justify-between items-center">
+                {% if tierlist and game_session %}
+                    <span class="font-medium">Players joined:</span>
+                    <span id="player-count" class="font-bold text-lg">3/{{ game_session.num_players }}</span>
+                {% endif %}
             </div>
-            
-            <!-- Player 2 -->
-            <div class="player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3">
-              <div class="w-10 h-10 rounded-full bg-[#faaa5a] border-2 border-black flex items-center justify-center font-bold text-black">
-                2
-              </div>
-              <div class="ml-3">
-                <p class="font-bold">Player 2</p>
-              </div>
-              <div class="ml-auto">
-                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-green-400">
-                  Ready
-                </span>
-              </div>
+            <div class="w-full bg-gray-200 rounded-full h-3 mt-2">
+                <div id="player-progress" class="bg-black h-3 rounded-full" style="width: 37.5%"></div>
             </div>
-            
-            <!-- Player 3 -->
-            <div class="player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3">
-              <div class="w-10 h-10 rounded-full bg-[#ffd966] border-2 border-black flex items-center justify-center font-bold text-black">
-                3
-              </div>
-              <div class="ml-3">
-                <p class="font-bold">Player 3</p>
-              </div>
-              <div class="ml-auto">
-                <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full border border-yellow-400">
-                  Not Ready
-                </span>
-              </div>
+
+            <!-- Players list -->
+            <div id="players-list" class="space-y-3">
+                <!-- Players will be injected here -->
             </div>
-            
-            <!-- Empty slots -->
-            <div class="player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3 opacity-50">
-              <div class="w-10 h-10 rounded-full bg-gray-300 border-2 border-black flex items-center justify-center font-bold text-black">
-                ?
-              </div>
-              <div class="ml-3">
-                <p class="font-bold">Waiting for player...</p>
-              </div>
-            </div>
-            
-            <div class="player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3 opacity-50">
-              <div class="w-10 h-10 rounded-full bg-gray-300 border-2 border-black flex items-center justify-center font-bold text-black">
-                ?
-              </div>
-              <div class="ml-3">
-                <p class="font-bold">Waiting for player...</p>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
     
     <!-- Footer with buttons -->
     <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-      <button class="game-button bg-gray-200 hover:bg-gray-300 text-black font-bold py-3 px-6 rounded-2xl text-lg border-4 border-black">
-        Copy Invite Link
-      </button>
-      <a href="#" class="game-button bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-2xl text-lg border-4 border-black text-center">
+      <a href="{{url_for('home')}}" class="game-button bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-2xl text-lg border-4 border-black text-center">
         Leave Game
       </a>
     </div>
   </div>
   
   <script>
-    // Initialize socket
-    var socket = io();
     
-    // Copy invite link functionality
-    document.querySelector('button:contains("Copy Invite Link")').addEventListener('click', function() {
-      const dummyLink = window.location.href;
-      navigator.clipboard.writeText(dummyLink).then(() => {
-        alert('Invite link copied to clipboard!');
-      });
+    // Initialize socket
+    var socket = io(); 
+    let users = {{ users|tojson }};// Ignore errors, jinja takes care of it
+    users = users.users; 
+    let count_req_for_user = 0;
+    console.log("Users is:", users);
+    socket.emit("join_room", {"room": "{{game_session['room_id']}}", "username": "{{session['game_name']}}" })
+    socket.on('joined_room', function(data) {
+        username = data['username'];
+        if (count_req_for_user !== 0) {
+            users.push(username);
+        }
+        console.log(users);
+        console.log(username + " Joined a game");
+        count_req_for_user++;
+        renderPlayers();
     });
+    
+    // Helper to render player cards
+    function renderPlayers() {
+        const playerListEl = document.getElementById('players-list');
+        const playerCountEl = document.getElementById('player-count');
+        const playerProgressEl = document.getElementById('player-progress');
+
+        const maxPlayers = parseInt('{{ game_session.num_players | default(6) }}');
+        playerListEl.innerHTML = ''; // Clear current list
+
+        users.forEach((username, index) => {
+            const playerNumber = index + 1;
+            const isHost = index === 0;
+
+            const card = document.createElement('div');
+            card.className = 'player-card flex items-center mt-2 bg-gray-50 rounded-xl border-3 border-black p-3';
+            card.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-[#${getColor(index)}] border-2 border-black flex items-center justify-center font-bold text-black">
+                    ${playerNumber}
+                </div>
+                <div class="ml-3">
+                    <p class="font-bold">${username}</p>
+                    ${isHost ? '<p class="text-sm text-gray-500">Host</p>' : ''}
+                </div>
+            `;
+            playerListEl.appendChild(card);
+        });
+
+        // Fill empty slots if needed
+        for (let i = users.length; i < maxPlayers; i++) {
+            const emptyCard = document.createElement('div');
+            emptyCard.className = 'player-card flex items-center bg-gray-50 rounded-xl border-3 border-black p-3 opacity-50';
+            emptyCard.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-gray-300 border-2 border-black flex items-center justify-center font-bold text-black">
+                    ?
+                </div>
+                <div class="ml-3">
+                    <p class="font-bold">Waiting for player...</p>
+                </div>
+            `;
+            playerListEl.appendChild(emptyCard);
+        }
+
+        // Update count
+        playerCountEl.textContent = `${users.length}/${maxPlayers}`;
+        // Update progress bar
+        const percent = (users.length / maxPlayers) * 100;
+        playerProgressEl.style.width = `${percent}%`;
+        }
+
+        // Simple helper to assign a color based on index
+        function getColor(index) {
+            const colors = ['ff6b6b', 'faaa5a', 'ffd966', '99ff99', '99ccff', 'cc99ff'];
+            return colors[index % colors.length];
+        }
+
   </script>
 </body>
 </html>

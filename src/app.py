@@ -56,8 +56,10 @@ def tierlist_proccessing():
 
     num_players = request.args.get("num_players")
     game_name = request.args.get("game_name")
-
-    session["game_name"] = game_name
+    
+    # Gaurds because I was being kind of silly
+    if game_name:
+        session["game_name"] = game_name
     session["is_host"] = True
 
     # As issue occurs, when the user enters no images. Fix pending.
@@ -110,6 +112,8 @@ def tierlist_proccessing():
         # Specifically for the player who made the game
         session["room_id"] = game_session.room_id
 
+
+
         return redirect(url_for("lobby"))
     return render_template("tier_proccesing.html", num_players=num_players)
 
@@ -117,16 +121,18 @@ def tierlist_proccessing():
 @app.route("/lobby", methods=["POST", "GET"])
 def lobby():
 
+
     game_session = mongo_game_sessions.find_one({"room_id": session["room_id"]})
     tierlist_uuid = game_session["tierlist_uuid"]
     tierlist = mongo_tierlists.find_one({"uuid": tierlist_uuid})
+
     mongo_game_sessions.update_one(
         {"room_id": session["room_id"]}, {"$push": {"users": session["game_name"]}}
     )
     users = mongo_game_sessions.find_one(
         {"room_id": session["room_id"]}, {"users": 1, "_id": 0}
     )
-
+    print(users)
     if request == "POST":
         is_game_start = request.form.get("is_game_start")
         if is_game_start:

@@ -237,13 +237,15 @@
     socket.on('room_listerner_client', function(data) {
         username = data['username'];
         if(username){
-        if (count_req_for_user !== 0) {
-            users.push(username);
-        }
-        console.log(users);
-        console.log(username + " Joined a game");
-        count_req_for_user++;
-        renderPlayers();
+
+            if (count_req_for_user !== 0) {
+                users.push(username);
+            }
+            console.log(users);
+            console.log(username + " Joined a game");
+            count_req_for_user++;
+            renderPlayers();
+
         }
 
         if (data['game_start'] === true){

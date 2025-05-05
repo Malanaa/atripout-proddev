@@ -133,13 +133,13 @@ def lobby():
         {"room_id": session["room_id"]}, {"users": 1, "_id": 0}
     )
     print(users)
-    if request == "POST":
+    if request.method == "POST":
         is_game_start = request.form.get("is_game_start")
         if is_game_start:
             socketio.emit(
-                "room_listerner_client", {"game_start": True}, to=session["room_id"]
+                "room_listerner_client", {"game_start": "started"}, to=session["room_id"]
             )
-
+        return(redirect(url_for('user_tierlist')))
     return render_template(
         "lobby.html", game_session=game_session, tierlist=tierlist, users=users
     )
@@ -150,11 +150,12 @@ def user_tierlist():
     game_session = mongo_game_sessions.find_one({"room_id": session["room_id"]})
     tierlist_uuid = game_session["tierlist_uuid"]
     tierlist = mongo_tierlists.find_one({"uuid": tierlist_uuid})
+    print(session['game_name'])
+    tierlist['user'] = session['game_name']
 
     tierlist["is_template"] = False
     print(tierlist)
-
-    return redirect(url_for("home"))
+    return redirect(url_for('home'))
 
 
 # Defining n-directional sockets (socketio rooms)
